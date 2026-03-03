@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
+import { useAuth } from '../auth/AuthContext';
+import { useState } from 'react';
 // import { useForm } from 'react-hook-form';
 
 type LoginForm = {
@@ -8,12 +10,16 @@ type LoginForm = {
   password: string;
 };
 
+
 export const Route = createFileRoute('/login')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const [authError, setAuthError] = useState("")
+
+  const {signIn} = useAuth()
 
   const {
     register,
@@ -21,13 +27,13 @@ function RouteComponent() {
     formState: { errors },
   } = useForm<LoginForm>();
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: {email: string, password: string}) => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', data);
-      console.log(response.data);
-      navigate({ to: '/dashboard' });
+      await signIn(data.email, data.password )
+      navigate({ to: '/home' });
     } catch (err: any) {
       console.error(err?.response?.data.message || 'Login failed');
+      setAuthError(err?.response?.data.message || "Invalid email or password")
     }
   };
 
@@ -43,29 +49,37 @@ function RouteComponent() {
             <label htmlFor="email" className="">
               Email:
             </label>
+              {errors.email && (
+                <span className='text-xs text-red-500'>{errors.email.message}</span>
+              )}
             <input
               type="text"
-              {...register('email')}
+              {...register('email', {required: "Email is required"})}
               className="border h-9 rounded-sm px-1 text-gray-400"
               placeholder="email@gmail.com"
             />
+              
             <label htmlFor="password" className="">
               Password:
             </label>
+              {errors.password && (
+                <span className='text-xs text-red-500'>{errors.password.message}</span>
+              )}
             <input
+
               type="password"
-              {...register('password')}
+              {...register('password', {required: "Password is required"})}
               className="border h-10 rounded-sm px-1 text-gray-400"
               placeholder="Enter your password"
             />
+            {authError && (
+              <span className='text-xs text-red-500 text-center'>{authError}</span>
+            )
+            }
             <button type="submit" className="border h-10 bg-amber-950 text-white my-2 rounded-sm">
               Login
             </button>
           </div>
-          <p className="text-center text-sm text-gray-600 mt-2">
-            Don't have an account?&nbsp;
-            <a className="text-blue-600 hover:text-blue-800 font-medium hover:underline">Sign up</a>
-          </p>
         </form>
       </div>
     </div>
