@@ -1,9 +1,8 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import { useAuth } from '../auth/AuthContext';
 import { useState } from 'react';
-// import { useForm } from 'react-hook-form';
+
 
 type LoginForm = {
   email: string;
